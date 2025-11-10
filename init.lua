@@ -321,7 +321,7 @@ require('lazy').setup({
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
-      vim.keymap.set('n', '<leader><leader>', ivy(builtin.find_files), { desc = '[ ] Find Files' })
+      vim.keymap.set('n', 'ff', ivy(builtin.find_files), { desc = '[ ] Find Files' })
       vim.keymap.set('n', '<leader>sh', ivy(builtin.help_tags), { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', ivy(builtin.keymaps), { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>ss', ivy(builtin.builtin), { desc = '[S]earch [S]elect Telescope' })
@@ -335,6 +335,55 @@ require('lazy').setup({
           ignore_current_buffer = true,
         }
       end, { desc = '[F]ind existing [B]uffers' })
+
+      -- JetBrains-style buffer switcher with Tab cycling
+      -- If buffer is already open in another tab, jump to that tab
+      vim.keymap.set('n', '<leader><Tab>', function()
+        builtin.buffers(require('telescope.themes').get_dropdown {
+          sort_mru = true,
+          ignore_current_buffer = true,
+          previewer = false,
+          initial_mode = 'normal',
+          attach_mappings = function(prompt_bufnr, map)
+            local actions = require 'telescope.actions'
+            local action_state = require 'telescope.actions.state'
+
+            -- Custom action to switch to buffer, jumping to tab if already open
+            local switch_buffer = function()
+              local selection = action_state.get_selected_entry()
+              actions.close(prompt_bufnr)
+
+              local bufnr = selection.bufnr
+
+              -- Check if buffer is already open in a tab
+              for tabnr = 1, vim.fn.tabpagenr '$' do
+                local tabwin = vim.fn.tabpagewinnr(tabnr)
+                local tabbuf = vim.fn.tabpagebuflist(tabnr)[tabwin]
+                if tabbuf == bufnr then
+                  -- Buffer found in this tab, switch to it
+                  vim.cmd('tabn ' .. tabnr)
+                  return
+                end
+              end
+
+              -- Buffer not open in any tab, open it in current window
+              vim.api.nvim_set_current_buf(bufnr)
+            end
+
+            -- Override default select action
+            map('i', '<CR>', switch_buffer)
+            map('n', '<CR>', switch_buffer)
+
+            -- Tab moves to next buffer
+            map('i', '<Tab>', actions.move_selection_next)
+            map('n', '<Tab>', actions.move_selection_next)
+            -- Shift-Tab moves to previous buffer
+            map('i', '<S-Tab>', actions.move_selection_previous)
+            map('n', '<S-Tab>', actions.move_selection_previous)
+            return true
+          end,
+        })
+      end, { desc = 'Switch buffers (JetBrains-style)' })
       vim.keymap.set('n', '<leader>sg', function()
         ivy(require('telescope').extensions.live_grep_args.live_grep_args) {
           auto_quoting = true, -- helps when your pattern has spaces

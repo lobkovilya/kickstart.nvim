@@ -109,6 +109,9 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- Delete current buffer
 vim.keymap.set('n', '<leader>bd', '<cmd>bdelete<CR>', { desc = '[B]uffer [D]elete' })
 
+-- Switch to previous buffer
+vim.keymap.set('n', '<leader>`', '<C-^>', { desc = 'Switch to previous buffer' })
+
 -- Git blame line
 vim.keymap.set('n', '<leader>gb', function()
   require('snacks').picker.git_log_line()
@@ -162,7 +165,7 @@ end, { desc = '[S]earch Recent Files ("." for repeat)' })
 
 -- JetBrains-style buffer switcher with Tab cycling
 vim.keymap.set('n', '<leader><Tab>', function()
-  picker().buffers()
+  picker().buffers { current = false }
 end, { desc = 'Switch buffers' })
 
 vim.keymap.set('n', '<leader>sg', function()
@@ -275,6 +278,15 @@ require('lazy').setup({
         enabled = true,
         layout = {
           preset = 'ivy',
+        },
+        win = {
+          input = {
+            keys = {
+              ['<Tab>'] = { 'list_down', mode = { 'i', 'n' } },
+              ['<S-Tab>'] = { 'list_up', mode = { 'i', 'n' } },
+              ['<Space>'] = { 'select_and_next', mode = { 'i', 'n' } },
+            },
+          },
         },
       },
     },

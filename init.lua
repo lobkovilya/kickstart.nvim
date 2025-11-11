@@ -125,6 +125,83 @@ vim.keymap.set({ 'n', 'x' }, '<leader>gB', function()
   require('snacks').gitbrowse()
 end, { desc = '[G]it [B]rowse (open)' })
 
+-- [[ Ginkgo Test Keybindings ]]
+local last_test_cmd = nil
+local last_test_cwd = nil
+
+-- Find ginkgo binary
+local function get_ginkgo_cmd()
+  -- Try common locations
+  local ginkgo_paths = {
+    vim.fn.expand '$HOME/go/bin/ginkgo',
+    vim.fn.expand '$GOPATH/bin/ginkgo',
+    'ginkgo', -- fallback to PATH
+  }
+
+  for _, path in ipairs(ginkgo_paths) do
+    if vim.fn.executable(path) == 1 then
+      return path
+    end
+  end
+
+  return 'ginkgo' -- fallback
+end
+
+-- Shared test terminal instance
+local test_terminal = nil
+
+vim.keymap.set('n', '<leader>ta', function()
+  local ginkgo = get_ginkgo_cmd()
+  last_test_cmd = ginkgo
+  last_test_cwd = vim.fn.expand '%:p:h'
+  if test_terminal then
+    test_terminal:close()
+  end
+  test_terminal = require('snacks').terminal(last_test_cmd, {
+    cwd = last_test_cwd,
+    win = { position = 'bottom' },
+    interactive = false,
+  })
+end, { desc = '[T]est [A]ll (ginkgo)' })
+
+vim.keymap.set('n', '<leader>tf', function()
+  local ginkgo = get_ginkgo_cmd()
+  local file = vim.fn.expand '%:t'
+  last_test_cmd = ginkgo .. ' --focus-file=' .. file
+  last_test_cwd = vim.fn.expand '%:p:h'
+  if test_terminal then
+    test_terminal:close()
+  end
+  test_terminal = require('snacks').terminal(last_test_cmd, {
+    cwd = last_test_cwd,
+    win = { position = 'bottom' },
+    interactive = false,
+  })
+end, { desc = '[T]est [F]ile (ginkgo)' })
+
+vim.keymap.set('n', '<leader>tr', function()
+  if last_test_cmd then
+    if test_terminal then
+      test_terminal:close()
+    end
+    test_terminal = require('snacks').terminal(last_test_cmd, {
+      cwd = last_test_cwd or vim.fn.getcwd(),
+      win = { position = 'bottom' },
+      interactive = false,
+    })
+  else
+    vim.notify('No previous test command', vim.log.levels.WARN)
+  end
+end, { desc = '[T]est [R]e-run last' })
+
+vim.keymap.set('n', '<leader>tt', function()
+  if test_terminal then
+    test_terminal:toggle()
+  else
+    vim.notify('No test terminal to toggle. Run a test first.', vim.log.levels.WARN)
+  end
+end, { desc = '[T]est [T]oggle window' })
+
 -- [[ Snacks Picker Keybindings ]]
 local picker = function()
   return require('snacks').picker
@@ -289,6 +366,20 @@ require('lazy').setup({
           },
         },
       },
+      terminal = {
+        enabled = true,
+        win = {
+          position = 'bottom',
+          height = 0.3,
+        },
+      },
+      styles = {
+        terminal = {
+          keys = {
+            q = 'hide',
+          },
+        },
+      },
     },
   },
   {
@@ -358,7 +449,7 @@ require('lazy').setup({
       -- Document existing key chains
       spec = {
         { '<leader>s', group = '[S]earch' },
-        { '<leader>t', group = '[T]oggle' },
+        { '<leader>t', group = '[T]est/Toggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
       },
     },

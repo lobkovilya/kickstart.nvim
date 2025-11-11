@@ -122,6 +122,73 @@ vim.keymap.set({ 'n', 'x' }, '<leader>gB', function()
   require('snacks').gitbrowse()
 end, { desc = '[G]it [B]rowse (open)' })
 
+-- [[ Snacks Picker Keybindings ]]
+local picker = function()
+  return require('snacks').picker
+end
+
+-- File and search pickers
+vim.keymap.set('n', 'ff', function()
+  picker().files()
+end, { desc = '[ ] Find Files' })
+
+vim.keymap.set('n', '<leader>sh', function()
+  picker().help()
+end, { desc = '[S]earch [H]elp' })
+
+vim.keymap.set('n', '<leader>sk', function()
+  picker().keymaps()
+end, { desc = '[S]earch [K]eymaps' })
+
+vim.keymap.set('n', '<leader>ss', function()
+  picker().pickers()
+end, { desc = '[S]earch [S]elect Picker' })
+
+vim.keymap.set('n', '<leader>sw', function()
+  picker().grep_word()
+end, { desc = '[S]earch current [W]ord' })
+
+vim.keymap.set('n', '<leader>sd', function()
+  picker().diagnostics()
+end, { desc = '[S]earch [D]iagnostics' })
+
+vim.keymap.set('n', '<leader>sr', function()
+  picker().resume()
+end, { desc = '[S]earch [R]esume' })
+
+vim.keymap.set('n', '<leader>s.', function()
+  picker().recent()
+end, { desc = '[S]earch Recent Files ("." for repeat)' })
+
+-- JetBrains-style buffer switcher with Tab cycling
+vim.keymap.set('n', '<leader><Tab>', function()
+  picker().buffers()
+end, { desc = 'Switch buffers' })
+
+vim.keymap.set('n', '<leader>sg', function()
+  picker().grep()
+end, { desc = '[S]earch by [G]rep' })
+
+vim.keymap.set('n', '<leader>/', function()
+  picker().lines()
+end, { desc = '[/] Fuzzily search in current buffer' })
+
+vim.keymap.set('n', '<leader>s/', function()
+  picker().grep { open_files_only = true }
+end, { desc = '[S]earch [/] in Open Files' })
+
+vim.keymap.set('n', '<leader>sn', function()
+  picker().files { cwd = vim.fn.stdpath 'config' }
+end, { desc = '[S]earch [N]eovim files' })
+
+vim.keymap.set('n', '<leader>e', function()
+  require('snacks').picker.explorer {
+    layout = { preset = 'ivy', preview = true },
+    auto_close = true,
+    matcher = { fuzzy = false },
+  }
+end, { desc = '[E]xplorer' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -178,12 +245,6 @@ end
 local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
-local ivy = function(f)
-  return function(opts)
-    return f(require('telescope.themes').get_ivy(opts))
-  end
-end
-
 for i = 1, 9 do
   vim.keymap.set('n', '<leader>' .. i, i .. 'gt', { desc = 'Go to tab ' .. i })
 end
@@ -209,7 +270,14 @@ require('lazy').setup({
     'folke/snacks.nvim',
     priority = 1000,
     lazy = false,
-    opts = {},
+    opts = {
+      picker = {
+        enabled = true,
+        layout = {
+          preset = 'ivy',
+        },
+      },
+    },
   },
   {
     'catppuccin/nvim',
@@ -283,177 +351,6 @@ require('lazy').setup({
       },
     },
   },
-  { -- Fuzzy Finder (files, lsp, etc)
-    'nvim-telescope/telescope.nvim',
-    event = 'VimEnter',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      {
-        'nvim-telescope/telescope-live-grep-args.nvim',
-        -- This will not install any breaking changes.
-        -- For major updates, this must be adjusted manually.
-        version = '^1.0.0',
-      },
-      { -- If encountering errors, see telescope-fzf-native README for installation instructions
-        'nvim-telescope/telescope-fzf-native.nvim',
-
-        -- `build` is used to run some command when the plugin is installed/updated.
-        -- This is only run then, not every time Neovim starts up.
-        build = 'make',
-
-        -- `cond` is a condition used to determine whether this plugin should be
-        -- installed and loaded.
-        cond = function()
-          return vim.fn.executable 'make' == 1
-        end,
-      },
-      { 'nvim-telescope/telescope-ui-select.nvim' },
-
-      -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
-    },
-    config = function()
-      require('telescope').setup {
-        defaults = {
-          mappings = {
-            i = {
-              ['<M-d>'] = 'select_vertical',
-              -- ['<CR>'] = 'select_tab',
-            },
-          },
-        },
-        extensions = {
-          ['ui-select'] = {
-            require('telescope.themes').get_dropdown(),
-          },
-          file_browser = {
-            mappings = {
-              i = {
-                ['<C-t>'] = 'select_tab',
-              },
-            },
-          },
-        },
-      }
-
-      -- Enable Telescope extensions if they are installed
-      pcall(require('telescope').load_extension, 'fzf')
-      pcall(require('telescope').load_extension, 'ui-select')
-      pcall(require('telescope').load_extension, 'live_grep_args')
-
-      -- See `:help telescope.builtin`
-      local builtin = require 'telescope.builtin'
-      vim.keymap.set('n', 'ff', ivy(builtin.find_files), { desc = '[ ] Find Files' })
-      vim.keymap.set('n', '<leader>sh', ivy(builtin.help_tags), { desc = '[S]earch [H]elp' })
-      vim.keymap.set('n', '<leader>sk', ivy(builtin.keymaps), { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>ss', ivy(builtin.builtin), { desc = '[S]earch [S]elect Telescope' })
-      vim.keymap.set('n', '<leader>sw', ivy(builtin.grep_string), { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sd', ivy(builtin.diagnostics), { desc = '[S]earch [D]iagnostics' })
-      vim.keymap.set('n', '<leader>sr', ivy(builtin.resume), { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', ivy(builtin.oldfiles), { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader>fb', function()
-        ivy(builtin.buffers) {
-          sort_mru = true,
-          ignore_current_buffer = true,
-        }
-      end, { desc = '[F]ind existing [B]uffers' })
-
-      -- JetBrains-style buffer switcher with Tab cycling
-      -- If buffer is already open in another tab, jump to that tab
-      vim.keymap.set('n', '<leader><Tab>', function()
-        builtin.buffers(require('telescope.themes').get_dropdown {
-          sort_mru = true,
-          ignore_current_buffer = true,
-          previewer = false,
-          initial_mode = 'normal',
-          attach_mappings = function(prompt_bufnr, map)
-            local actions = require 'telescope.actions'
-            local action_state = require 'telescope.actions.state'
-
-            -- Custom action to switch to buffer, jumping to tab if already open
-            local switch_buffer = function()
-              local selection = action_state.get_selected_entry()
-              actions.close(prompt_bufnr)
-
-              local bufnr = selection.bufnr
-
-              -- Check if buffer is already open in a tab
-              for tabnr = 1, vim.fn.tabpagenr '$' do
-                local tabwin = vim.fn.tabpagewinnr(tabnr)
-                local tabbuf = vim.fn.tabpagebuflist(tabnr)[tabwin]
-                if tabbuf == bufnr then
-                  -- Buffer found in this tab, switch to it
-                  vim.cmd('tabn ' .. tabnr)
-                  return
-                end
-              end
-
-              -- Buffer not open in any tab, open it in current window
-              vim.api.nvim_set_current_buf(bufnr)
-            end
-
-            -- Override default select action
-            map('i', '<CR>', switch_buffer)
-            map('n', '<CR>', switch_buffer)
-
-            -- Tab moves to next buffer
-            map('i', '<Tab>', actions.move_selection_next)
-            map('n', '<Tab>', actions.move_selection_next)
-            -- Shift-Tab moves to previous buffer
-            map('i', '<S-Tab>', actions.move_selection_previous)
-            map('n', '<S-Tab>', actions.move_selection_previous)
-            return true
-          end,
-        })
-      end, { desc = 'Switch buffers (JetBrains-style)' })
-      vim.keymap.set('n', '<leader>sg', function()
-        ivy(require('telescope').extensions.live_grep_args.live_grep_args) {
-          auto_quoting = true, -- helps when your pattern has spaces
-        }
-      end, { desc = '[S]earch by [G]rep (with args)' })
-      -- Slightly advanced example of overriding default behavior and theme
-      vim.keymap.set('n', '<leader>/', function()
-        -- You can pass additional configuration to Telescope to change the theme, layout, etc.
-        builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-          winblend = 10,
-          previewer = false,
-        })
-      end, { desc = '[/] Fuzzily search in current buffer' })
-
-      -- It's also possible to pass additional configuration options.
-      --  See `:help telescope.builtin.live_grep()` for information about particular keys
-      vim.keymap.set('n', '<leader>s/', function()
-        ivy(builtin.live_grep) {
-          grep_open_files = true,
-          prompt_title = 'Live Grep in Open Files',
-        }
-      end, { desc = '[S]earch [/] in Open Files' })
-
-      -- Shortcut for searching your Neovim configuration files
-      vim.keymap.set('n', '<leader>sn', function()
-        ivy(builtin.find_files) { cwd = vim.fn.stdpath 'config' }
-      end, { desc = '[S]earch [N]eovim files' })
-    end,
-  },
-  {
-    'nvim-telescope/telescope-file-browser.nvim',
-    dependencies = { 'nvim-telescope/telescope.nvim', 'nvim-lua/plenary.nvim' },
-    keys = {
-      {
-        '<leader>e',
-        function()
-          ivy(require('telescope').extensions.file_browser.file_browser) {
-            path = vim.fn.expand '%:p:h',
-            select_buffer = true,
-            respect_gitignore = true,
-            hidden = true,
-          }
-        end,
-        mode = 'n',
-        desc = '[E]xplorer',
-      },
-    },
-  },
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -495,29 +392,41 @@ require('lazy').setup({
           map('ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
 
           -- Find references for the word under your cursor.
-          map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+          map('gr', function()
+            require('snacks').picker.lsp_references()
+          end, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
-          map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+          map('gI', function()
+            require('snacks').picker.lsp_implementations()
+          end, '[G]oto [I]mplementation')
 
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
           --  To jump back, press <C-t>.
-          map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+          map('gd', function()
+            require('snacks').picker.lsp_definitions()
+          end, '[G]oto [D]efinition')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map('gO', require('telescope.builtin').lsp_document_symbols, 'Open Document Symbols')
+          map('gO', function()
+            require('snacks').picker.lsp_symbols()
+          end, 'Open Document Symbols')
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
+          map('gW', function()
+            require('snacks').picker.lsp_workspace_symbols()
+          end, 'Open Workspace Symbols')
 
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
-          map('gy', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
+          map('gy', function()
+            require('snacks').picker.lsp_type_definitions()
+          end, '[G]oto [T]ype Definition')
 
           -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
           ---@param client vim.lsp.Client

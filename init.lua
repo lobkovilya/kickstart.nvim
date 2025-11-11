@@ -109,6 +109,19 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- Delete current buffer
 vim.keymap.set('n', '<leader>bd', '<cmd>bdelete<CR>', { desc = '[B]uffer [D]elete' })
 
+-- Git blame line
+vim.keymap.set('n', '<leader>gb', function()
+  require('snacks').picker.git_log_line()
+end, { desc = '[G]it [B]lame line' })
+
+vim.keymap.set('n', '<leader>gf', function()
+  require('snacks').picker.git_log_file()
+end, { desc = '[G]it [F]ile History' })
+
+vim.keymap.set({ 'n', 'x' }, '<leader>gB', function()
+  require('snacks').gitbrowse()
+end, { desc = '[G]it [B]rowse (open)' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -190,6 +203,12 @@ require('lazy').setup({
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
+    opts = {},
+  },
+  {
+    'folke/snacks.nvim',
+    priority = 1000,
+    lazy = false,
     opts = {},
   },
   {

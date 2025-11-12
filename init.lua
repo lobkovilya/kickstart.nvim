@@ -762,6 +762,8 @@ require('lazy').setup({
       keymap = {
         preset = 'default',
         ['<C-i>'] = { 'show', 'show_documentation', 'hide_documentation' },
+        ['<Tab>'] = {},
+        ['<S-Tab>'] = {},
       },
 
       appearance = {
@@ -790,9 +792,14 @@ require('lazy').setup({
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        default = { 'lsp', 'path', 'snippets', 'copilot' },
         providers = {
-          lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+          copilot = {
+            name = 'copilot',
+            module = 'blink-cmp-copilot',
+            score_offset = 100,
+            async = true,
+          },
         },
       },
 
@@ -837,6 +844,26 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
+  -- GitHub Copilot
+  {
+    'zbirenbaum/copilot.lua',
+    event = 'InsertEnter',
+    config = function()
+      require('copilot').setup {
+        suggestion = {
+          enabled = true,
+          auto_trigger = false,
+        },
+        panel = { enabled = false },
+        filetypes = {
+          ['*'] = true,
+        },
+      }
+    end,
+  },
+  {
+    'giuxtaposition/blink-cmp-copilot',
+  },
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()

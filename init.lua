@@ -249,6 +249,10 @@ vim.keymap.set('n', '<leader>sg', function()
   picker().grep()
 end, { desc = '[S]earch by [G]rep' })
 
+vim.keymap.set('x', '<leader>sg', function()
+  picker().grep_word()
+end, { desc = '[S]earch by [G]rep' })
+
 vim.keymap.set('n', '<leader>/', function()
   picker().lines()
 end, { desc = '[/] Fuzzily search in current buffer' })

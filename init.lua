@@ -953,6 +953,20 @@ require('lazy').setup({
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
+
+  -- Smear cursor for smooth cursor trails
+  {
+    'sphamba/smear-cursor.nvim',
+    opts = {
+      -- Smear cursor when switching buffers or windows
+      smear_between_buffers = true,
+      -- Smear cursor when moving in insert mode
+      smear_between_neighbor_lines = true,
+      -- Set to `true` if you want to use transparent background
+      legacy_computing_symbols_support = false,
+    },
+  },
+
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',

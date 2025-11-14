@@ -360,8 +360,7 @@ require('lazy').setup({
           input = {
             keys = {
               ['<Tab>'] = { 'list_down', mode = { 'i', 'n' } },
-              ['<S-Tab>'] = { 'list_up', mode = { 'i', 'n' } },
-              ['<Space>'] = { 'select_and_next', mode = { 'i', 'n' } },
+              ['<S-Tab>'] = { 'select_and_next', mode = { 'i', 'n' } },
             },
           },
         },

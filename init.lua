@@ -240,6 +240,10 @@ vim.keymap.set('n', '<leader>s.', function()
   picker().recent()
 end, { desc = '[S]earch Recent Files ("." for repeat)' })
 
+vim.keymap.set('n', '<leader>sc', function()
+  picker().colorschemes()
+end, { desc = '[S]earch [C]olorschemes' })
+
 -- JetBrains-style buffer switcher with Tab cycling
 vim.keymap.set('n', '<leader><Tab>', function()
   picker().buffers { current = false }
@@ -388,7 +392,6 @@ require('lazy').setup({
   {
     'catppuccin/nvim',
     name = 'catppuccin',
-    priority = 1000,
     config = function()
       require('catppuccin').setup {
         flavour = 'latte', -- other options: latte, mocha, frappe, macchiato
@@ -401,7 +404,6 @@ require('lazy').setup({
           }
         end,
       }
-      vim.cmd.colorscheme 'catppuccin'
     end,
   },
   { -- Useful plugin to show you pending keybinds.
@@ -765,7 +767,7 @@ require('lazy').setup({
     opts = {
       keymap = {
         preset = 'default',
-        ['<C-i>'] = { 'show', 'show_documentation', 'hide_documentation' },
+        ['<C-,>'] = { 'show', 'show_documentation', 'hide_documentation' },
         ['<Tab>'] = {},
         ['<S-Tab>'] = {},
       },
@@ -823,27 +825,29 @@ require('lazy').setup({
     },
   },
 
-  -- { -- You can easily change to a different colorscheme.
-  --   -- Change the name of the colorscheme plugin below, and then
-  --   -- change the command in the config to whatever the name of that colorscheme is.
-  --   --
-  --   -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-  --   'folke/tokyonight.nvim',
-  --   priority = 1000, -- Make sure to load this before all the other start plugins.
-  --   config = function()
-  --     ---@diagnostic disable-next-line: missing-fields
-  --     require('tokyonight').setup {
-  --       styles = {
-  --         comments = { italic = false }, -- Disable italics in comments
-  --       },
-  --     }
-  --
-  --     -- Load the colorscheme here.
-  --     -- Like many other themes, this one has different styles, and you could load
-  --     -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-  --     vim.cmd.colorscheme 'tokyonight-night'
-  --   end,
-  -- },
+  {
+    'folke/tokyonight.nvim',
+    config = function()
+      ---@diagnostic disable-next-line: missing-fields
+      require('tokyonight').setup {
+        styles = {
+          comments = { italic = false }, -- Disable italics in comments
+        },
+      }
+    end,
+  },
+
+  {
+    'morhetz/gruvbox',
+    priority = 1000,
+    config = function()
+      vim.g.gruvbox_contrast_dark = 'hard'
+      vim.g.gruvbox_contrast_light = 'hard'
+      vim.o.background = 'dark'
+
+      vim.cmd.colorscheme 'gruvbox'
+    end,
+  },
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },

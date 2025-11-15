@@ -369,6 +369,7 @@ require('lazy').setup({
             keys = {
               ['<Tab>'] = { 'list_down', mode = { 'i', 'n' } },
               ['<S-Tab>'] = { 'select_and_next', mode = { 'i', 'n' } },
+              ['<C-d>'] = { 'edit_vsplit', mode = { 'i', 'n' } },
             },
           },
         },

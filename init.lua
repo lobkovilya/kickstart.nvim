@@ -125,6 +125,10 @@ vim.keymap.set({ 'n', 'x' }, '<leader>gB', function()
   require('snacks').gitbrowse()
 end, { desc = '[G]it [B]rowse (open)' })
 
+vim.keymap.set('n', '<leader>gl', function()
+  require('snacks').lazygit()
+end, { desc = '[G]it [L]azygit' })
+
 -- [[ Ginkgo Test Keybindings ]]
 local last_test_cmd = nil
 local last_test_cwd = nil
@@ -379,6 +383,14 @@ require('lazy').setup({
         win = {
           position = 'bottom',
           height = 0.3,
+        },
+      },
+      lazygit = {
+        enabled = true,
+        win = {
+          position = 'float',
+          width = 0.9,
+          height = 0.9,
         },
       },
       styles = {

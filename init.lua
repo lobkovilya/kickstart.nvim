@@ -661,6 +661,18 @@ require('lazy').setup({
             undeclaredname = true,
           },
         },
+        rust_analyzer = {
+          settings = {
+            ['rust-analyzer'] = {
+              cargo = {
+                allFeatures = true,
+              },
+              checkOnSave = {
+                command = 'clippy',
+              },
+            },
+          },
+        },
         lua_ls = {
           settings = {
             Lua = {
@@ -743,6 +755,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         go = { 'gopls' },
+        rust = { 'rustfmt' },
       },
     },
   },
@@ -1007,7 +1020,7 @@ require('lazy').setup({
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
       folds = { enable = true },
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'rust', 'toml' },
       -- Autoinstall languages that are not installed
       auto_install = false,
       highlight = {
@@ -1019,6 +1032,44 @@ require('lazy').setup({
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
+  },
+
+  -- Rust support (lazy-loaded only for Rust files)
+  {
+    'mrcjkb/rustaceanvim',
+    version = '^5',
+    lazy = false, -- This plugin is already lazy
+    ft = { 'rust' },
+    config = function()
+      vim.g.rustaceanvim = {
+        server = {
+          on_attach = function(_, bufnr)
+            -- Rust-specific keymaps
+            vim.keymap.set('n', '<leader>ca', function()
+              vim.cmd.RustLsp 'codeAction'
+            end, { buffer = bufnr, desc = '[C]ode [A]ction' })
+            vim.keymap.set('n', '<leader>dr', function()
+              vim.cmd.RustLsp 'debuggables'
+            end, { buffer = bufnr, desc = '[D]ebug [R]unnables' })
+          end,
+        },
+      }
+    end,
+  },
+
+  -- Rust crate management (lazy-loaded only for Cargo.toml)
+  {
+    'saecki/crates.nvim',
+    event = { 'BufRead Cargo.toml' },
+    config = function()
+      require('crates').setup {
+        completion = {
+          cmp = {
+            enabled = true,
+          },
+        },
+      }
+    end,
   },
 }, {
   ui = {

@@ -377,6 +377,11 @@ require('lazy').setup({
             },
           },
         },
+        sources = {
+          buffers = {
+            sort_mru = true,
+          },
+        },
       },
       terminal = {
         enabled = true,

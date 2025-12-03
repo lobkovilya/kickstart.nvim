@@ -233,7 +233,12 @@ vim.keymap.set('n', '<leader>sw', function()
 end, { desc = '[S]earch current [W]ord' })
 
 vim.keymap.set('n', '<leader>sd', function()
-  picker().diagnostics()
+  picker().diagnostics {
+    layout = {
+      preset = 'ivy',
+      preview = false,
+    },
+  }
 end, { desc = '[S]earch [D]iagnostics' })
 
 vim.keymap.set('n', '<leader>sr', function()

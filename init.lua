@@ -506,6 +506,13 @@ require('lazy').setup({
       { 'j-hui/fidget.nvim', opts = {} },
       'saghen/blink.cmp',
     },
+    opts = {
+      setup = {
+        rust_analyzer = function()
+          return true
+        end,
+      },
+    },
     config = function()
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
@@ -666,18 +673,6 @@ require('lazy').setup({
             undeclaredname = true,
           },
         },
-        rust_analyzer = {
-          settings = {
-            ['rust-analyzer'] = {
-              cargo = {
-                allFeatures = true,
-              },
-              checkOnSave = {
-                command = 'clippy',
-              },
-            },
-          },
-        },
         lua_ls = {
           settings = {
             Lua = {
@@ -714,6 +709,7 @@ require('lazy').setup({
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
         handlers = {
+          -- Default handler for all other servers
           function(server_name)
             local server = servers[server_name] or {}
             -- This handles overriding only values explicitly passed
@@ -1040,14 +1036,35 @@ require('lazy').setup({
   },
 
   -- Rust support (lazy-loaded only for Rust files)
+  -- Must be loaded before nvim-lspconfig to prevent duplicate rust-analyzer
   {
     'mrcjkb/rustaceanvim',
     version = '^5',
-    lazy = false, -- This plugin is already lazy
+    lazy = false,
     ft = { 'rust' },
-    config = function()
+    init = function()
+      -- Prevent lspconfig from setting up rust_analyzer
+      -- rustaceanvim will handle it automatically
       vim.g.rustaceanvim = {
         server = {
+          standalone = true, -- Tell rustaceanvim to use standalone mode
+          settings = {
+            ['rust-analyzer'] = {
+              cargo = {
+                allFeatures = true,
+                loadOutDirsFromCheck = true,
+              },
+              procMacro = {
+                enable = true,
+              },
+              check = {
+                command = 'clippy',
+              },
+              rustc = {
+                source = 'discover',
+              },
+            },
+          },
           on_attach = function(_, bufnr)
             -- Rust-specific keymaps
             vim.keymap.set('n', '<leader>ca', function()

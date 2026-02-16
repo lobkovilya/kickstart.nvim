@@ -326,6 +326,14 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'markdown',
+  callback = function()
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = 'en_us'
+  end,
+})
+
 vim.api.nvim_create_autocmd({ 'InsertLeave', 'TextChanged' }, {
   pattern = { '*' },
   command = 'silent! wall',
@@ -898,6 +906,19 @@ require('lazy').setup({
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+
+  -- Zen mode for centered editing on wide monitors
+  {
+    'folke/zen-mode.nvim',
+    keys = {
+      { '<leader>zm', '<cmd>ZenMode<cr>', desc = '[Z]en [M]ode toggle' },
+    },
+    opts = {
+      window = {
+        width = 150,
+      },
+    },
+  },
 
   -- Flash.nvim for enhanced navigation and selection
   {

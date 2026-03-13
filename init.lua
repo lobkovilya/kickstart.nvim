@@ -327,6 +327,16 @@ vim.api.nvim_create_autocmd('FileType', {
 })
 
 vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'c', 'cpp' },
+  callback = function()
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+    vim.opt_local.expandtab = true
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
   pattern = 'markdown',
   callback = function()
     vim.opt_local.spell = true
@@ -741,8 +751,15 @@ require('lazy').setup({
         },
       }
 
+      -- Configure clangd for C/C++
+      vim.lsp.config.clangd = {
+        capabilities = capabilities,
+        cmd = { 'clangd', '--background-index', '--clang-tidy', '--header-insertion=iwyu', '--completion-style=detailed', '--function-arg-placeholders' },
+        filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
+      }
+
       -- Enable the configured LSP servers
-      vim.lsp.enable { 'gopls', 'lua_ls' }
+      vim.lsp.enable { 'gopls', 'lua_ls', 'clangd' }
     end,
   },
 
@@ -766,7 +783,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = {}
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
@@ -780,6 +797,8 @@ require('lazy').setup({
         lua = { 'stylua' },
         go = { 'gopls' },
         rust = { 'rustfmt' },
+        c = { 'clang-format' },
+        cpp = { 'clang-format' },
       },
     },
   },
@@ -1061,7 +1080,7 @@ require('lazy').setup({
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
       folds = { enable = true },
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'rust', 'toml' },
+      ensure_installed = { 'bash', 'c', 'cpp', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'rust', 'toml', 'make', 'cmake' },
       -- Autoinstall languages that are not installed
       auto_install = false,
       highlight = {
